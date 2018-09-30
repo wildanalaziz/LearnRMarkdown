@@ -1,0 +1,283 @@
+---
+title: Analisis _American New Cars and Trucks_ 2004 Menggunakan _Principal Component
+  Analysis_ Dan _Factor Analysis_ Dengan RStudio
+author: "Achmad Wildan Al Aziz & Rizky Nanda Noverianto"
+date: "September 7, 2017"
+output:
+  word_document: default
+  html_notebook:
+    theme: united
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+![](D:/Kuliah/AD 2/RStudio-Ball.png)
+
+# Deskripsi Data
+Data yang digunakan adalah data sekunder spesifikasi 428 mobil baru di Amerika pada tahun 2004. Data tersebut merupakan data _American New Cars and Trucks 2004_. Data ini diambil pada hari Sabtu, tanggal 15 April 2017 pukul 16.00 melalui website http://new.censusatschool.org.nz
+```{r, include=FALSE}
+library(DT)
+library(psych)
+library(ggplot2)
+library(corrplot)
+```
+
+```{r}
+data1=read.table("D:/Kuliah/AD 2/Tugas Rmarkdown/data.txt", header=T)
+datatable(data1)
+```
+
+
+
+
+Variabel yang digunakan adalah sebagai berikut
+
+Variabel | Keterangan
+--------- | ----------
+x1 | _Retail Price_ ($US)
+x2 | _Dealer Cost_ ($US)
+x3 | _Engine Size_ (Litres)
+x4 | _Number of Cylinders_
+x5 | _Horsepower_ (hp)
+x6 | _City_ (km/100L)
+x7 | _Open Road_ (km/100L)
+x8 | _Weight_ (kg)
+x9 | _Wheel Base_ (cm)
+x10 | _Length_ (cm)
+x11 | _Width_ (cm)
+
+***
+
+# Eksplorasi Data {.tabset}
+Berikut adalah korelasi antar variabel dari data _American New Cars and Trucks_ 2004.
+```{r}
+corrplot(cor(data1),type="lower",method="circle")
+```
+
+Semua Variabel berkorelasi positif. Variabel X1 dengan x2 berkorelasi paling tinggi. Variabel x1 dengan x9 dan X2 dengan x9 berkorelasi paling rendah.
+
+## x1
+Variabel x1 adalah harga yang ditawarkan produsen dan sudah termasuk keuntungan bagi dealer.
+```{r}
+ggplot(data1, aes(data1$x1)) + 
+    geom_histogram(breaks=seq(0, 200000, by=20000), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Retail Price ($US)") +
+    ggtitle("Frequency histogram of Retail Price ($US)")
+```
+
+Tampak histogram _skew kanan_, sehingga variabel X1 tidak berdistribusi normal. Mayoritas produsen memberikan harga sekitar 20000-4000 ($US).
+
+## x2
+Biaya yang dibayarkan dealer pada pada produsen.
+
+```{r}
+ggplot(data1, aes(data1$x2)) + 
+    geom_histogram(breaks=seq(0, 200000, by=20000), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Dealer Cost ($US)") +
+    ggtitle("Frequency histogram of Dealer Cost")
+```
+
+Tampak histogram _skew kanan_, sehingga variabel X2 tidak berdistribusi normal. Mayoritas dealer harus membayar kepada produsen sebesar 20000-40000 ($US).
+
+## x3
+Ukuran kapasitas mesin dalam liter.
+```{r}
+ggplot(data1, aes(data1$x3)) + 
+    geom_histogram(breaks=seq(1, 10, by=1), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Engine Size (Litres)") +
+    ggtitle("Frequency histogram of Engine Size (Litres)")
+```
+
+Tampak histogram _skew kanan_, sehingga variabel X3 tidak berdistribusi normal. Mayoritas mobil memiliki kapasitas mesin 2,5 liter.
+
+## x4
+Jumlah silinder pada mobil.
+```{r}
+p=as.data.frame(table(data1$x4))
+pie(p$Freq,p$Var1,main = "Number of Cylinders")
+```
+Mayoritas mobil memiliki 6 silinder.
+
+## x5
+Tenaga mobil dalam satuan horsepower (hp).
+```{r}
+ggplot(data1, aes(data1$x5)) + 
+    geom_histogram(breaks=seq(0, 500, by=50), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Horsepower (hp)") +
+    ggtitle("Frequency histogram of Horsepower (hp)")
+```
+
+Tampak histogram _skew kanan_, sehingga variabel X5 tidak berdistribusi normal. Mayoritas mobil memiliki tenaga sekitar 200 hp.
+
+## x6
+Efisiensi bahan bakar dalam km per 100 liter pada jalanan dalam kota.
+```{r}
+ggplot(data1, aes(data1$x6)) + 
+    geom_histogram(breaks=seq(0, 25, by=2.5), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "City (km/100L)") +
+    ggtitle("Frequency histogram of City (km/100L)")
+```
+Tampak histogram simtetris sehingga variabel X6 berdistribusi normal. Mayoritas mobil mampu menempuh 10-13 km dengan 100 liter bahan bakar pada perjalanan dalam kota.
+
+## x7
+Efisiensi bahan bakar dalam km per 100 liter pada jalan bebas hambatan.
+
+```{r}
+ggplot(data1, aes(data1$x7)) + 
+    geom_histogram(breaks=seq(0, 20, by=2), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "open roads (km/100L)") +
+    ggtitle("Frequency histogram of open roads (km/100L)")
+```
+Tampak histogram simetris, sehingga variabel X7 berdistribusi normal. Mayoritas mobil mampu menempuh 8-10 km dengan 100 liter bahan bakar pada perjalanan dalam kota.
+
+## x8
+Berat mobil dalam satuan kilogram.
+```{r}
+ggplot(data1, aes(data1$x8)) + 
+    geom_histogram(breaks=seq(0, 3500, by=500), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Weight (kg)") +
+    ggtitle("Frequency histogram of Weight (kg)")
+```
+Tampak histogram simetris, sehingga variabel X8 berdistribusi normal. Mayoritas mobil memiliki bobot 1500-2000 kilogram.
+
+## x9
+panjang _wheel base_ mobil dalam satuan cm.
+```{r}
+ggplot(data1, aes(data1$x9)) + 
+    geom_histogram(breaks=seq(200, 375, by=10), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Wheel Base (cm)") +
+    ggtitle("Frequency histogram of Wheel Base (cm)")
+```
+Tampak histogram simetris, sehingga variabel X9 berdistribusi normal. Mayoritas mobil memiliki panjang jarak sumbu roda 260-270 cm.
+
+## x10
+Panjang mobil dalam satuan cm.
+```{r}
+ggplot(data1, aes(data1$x10)) + 
+    geom_histogram(breaks=seq(350, 600, by=20), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Length (cm)") +
+    ggtitle("Frequency histogram of Length (cm)")
+```
+Tampak histogram simetris, sehingga variabel X10 berdistribusi normal. Mayoritas mobil memiliki panjang 450-470 cm.
+
+## x11
+Lebar mobil dalam satuan cm.
+```{r}
+ggplot(data1, aes(data1$x11)) + 
+    geom_histogram(breaks=seq(160, 210, by=5), 
+                                     aes(fill=..count..)) +
+    scale_y_continuous(name = "Count") +
+scale_x_continuous(name = "Width (cm)") +
+    ggtitle("Frequency histogram of Width (cm)")
+```
+Tampak histogram _skew kanan_, sehingga variabel X11 tidak berdistribusi normal. Mayoritas mobil memiliki lebar 175-180 cm.
+
+### End tabset
+
+
+***
+
+#_Principal Component Analysis_ & _Factor Analysis_
+
+###Asumsi
+Uji kecukupan data digunakan untuk mengetahui layak tidaknya analisis faktor dilakukan. Uji kecukupan data dalam spesifikasi mobil di amerika dilakukan dengan menggunakan uji Kasier Kayer Olkin (KMO). Sedangkan uji korelasi yang digunakan untuk mengetahui apakah terdapat hubungan antar variabel dalam perhitungan spesifikasi mobil di amerika menggunakan metode uji Barrlett. Berikut ini adalah hasil dari perhitungan uji KMO dan uji Bartlett.
+
+```{r}
+KMO(data1)
+```
+Diketahui nilai KMO adalah 0.85 atau 85%. Hal itu menunjukkan terdapat korelasi antar variabel sehingga spesifikasi yang diberikan untuk mobil baru di Amerika sudah cukup untuk dilakukan analisis faktor.
+```{r}
+bartlett.test(data1)
+```
+
+Ditunjukkan juga nilai  P-value Barltlett test didapatkan sebesar 0.000 lebih kecil dari taraf signifikan sebesar 0.05, dari pernyataan tersebut dapat diputuskan menolak H~0~ sehingga dapat disimpulkan data spesifikasi yang diberikan untuk mobil baru di Amerika saling berhubungan dan dapat dilanjutkan analisis berikutnya.
+
+###_Principal Component Analysis_
+Analisis komponen utama digunakan untuk mengelompokkan variabel-variabel spesifikasi mobil baru di Amerika pada tahun 2004. Berikut adalah analisis dan pembahasan untuk analisis komponen utama. 
+
+```{r}
+plot(eigen(cor(data1))$value,ylab = "variance", xlab = "component")
+lines(eigen(cor(data1))$values,)
+```
+
+
+Dari _Scree Plot_ dapat dilihat bahwa dari titik pertama ke titik kedua menunjukkan garis yang turun secara curam. Sedangkan dari titik kedua ke titik ketiga hingga titik kesebelas menunjukkan garis garis yang turun secara landai. Sehingga hanya terdapat 2 komponen utama. 
+
+Penentuan jumlah faktor dapat dilihat juga dari eigenvalue. Berikut ini adalah eigenvalue dari data spesifikasi mobil amerika tahun 2004.
+```{r}
+korelasi=cor(data1)
+p=ncol(data1)
+sumvar <- sum(eigen(korelasi)$values)
+pvar <- matrix(c(0),p,1)
+cumvar <- matrix(c(0),p,1)
+for(i in 1:p){
+  pvar[i] <- eigen(korelasi)$values[i]/sumvar*100
+  if (i == 1) {cumvar[i] <- pvar[i]}
+  else
+    cumvar[i] <- pvar[i] + cumvar[i-1]
+}
+disp1=cbind(eigen(cor(data1))$values,pvar,cumvar)
+colnames(disp1)=c("Eigenvalues","Persentase Varians","Persentase Kumulatif")
+disp1
+
+```
+
+Nilai eigenvalue  menunjukkan dasar pembentuk faktor baru yang terletak pada komponen pertama dan kedua dimana nilai eigen value-nya lebih dari satu. Nilai total eigen value pada komponen pertama sebesar 6,913 dan komponen kedua sebesar 1,839. Hal tersebut mempunyai arti bahwa terdapat dua faktor baru yang terbentuk. Kedua komponen baru tersebut memiliki nilai kumulatif varians sebesar 79,564 persen yang mempunyai arti bahwa kedua komponen baru yang terbentuk mampu menjelaskan 79,564 persen variabilitas dari data yang dihasilkan.
+
+```{r}
+eigen(cor(data1))$vector[,1:2]
+```
+Dari dua metode yang telah dibahas didapatkan 2 komponen utama terbentuk, sehingga didapatkan 2 persamaan sebagai berikut.
+
+Y~1~ = - 0.26494 X~1~ - 0.26288 X~2~ - 0.35045 X~3~ - 0.33285 X~4~ - 0.32344 X~5~ - 0.33513 X~6~ -
+0.3001 X~7~ - 0.32931 X~8~ - 0.26044 X~9~ - 0.24584 X~10~ - 0.28878 X~11~
+
+Y~2~ = 0.491063 X~1~ + 0.493913 X~2~ - 0.02327 X~3~ + 0.072316 X~4~ + 0.290431 X~5~ - 0.02846 X~6~ -
+0.06412 X~7~ - 0.19009 X~8~ - 0.41203 X~9~ - 0.37016 X~10~ - 0.27738 X~11~
+
+###_Factor Analysis_
+Berdasarkan pada analisis komponen utama didapatkan bahwa banyaknya faktor yang diperlukan untuk mereduksi suatu variabel adalah sebanyak 2 faktor dan dilanjutkan dengan analisis faktor sebagai berikut.
+
+```{r}
+principal(data1,nfactors = 2,rotate="varimax")$loadings
+```
+
+Berdasarkan nilai komponen menunjukkan pengelompokan terhadap 11 variabel spesifikasi mobil baru di amerika berdasarkan kontribusi yang paling besar pada kedua komponen. Variabel yang masuk ke dalam komponen satu adalah variabel X~3~, X~6~, X~7~, X~8,~ X~9~, X~10~, dan X~11~ karena kontribusi yang paling besar diberikan pada komponen satu. Variabel yang masuk ke dalam komponen dua yaitu variabel X~1~, X~2~, x~4~ dan X~5~ dikarenakan nilai kontribusi terbesar pada komponen dua.
+
+sehingga faktor baru yang terbentuk adalah sebagai berikut
+
+Variabel | Keterangan Variabel | Nama Faktor Baru
+-------- | ------------------- | -----------
+x3 | _Engine Size (Litres)_ | Eksternal
+x6 | _CIty_ (km/100L) | Eksternal
+x7 | _Open Road_ (km/100L) | Eksternal
+x8 | _Wieght_ (kg) | Eksternal
+x9 | _Wheel Base_ (cm) | Eksternal
+x10 | _Length_ (cm) | Eksternal
+x11 | _Width_ (cm) | Eksternal
+x1 | _Retail Price_ ($US) | Internal
+x2 | _Cost Price_ ($US) | Internal
+x4 | _Number of Cylinders_ | Internal
+x5 | _Horsepower_ (hp) | Internal
+
+Terdapat dua faktor baru yang terbentuk yaitu faktor Internal dan faktor Eksternal. Penamaan faktor baru tersebut didasarkan pada buku pengetahuan komponen mobil yang ditulis oleh Drs. Daryanto. Variabel engine size, city, weight, wheel base, length dan width merupakan spesifikasi berdasarkan internal mobil baru di Amerika pada tahun 2004. Sedangkan variabel retail price dan cost price merupakan spesifikasi berdasarkan faktor eksternal mobil baru di Amerika pada tahun 2004
